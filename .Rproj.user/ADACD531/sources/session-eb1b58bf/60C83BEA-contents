@@ -1,0 +1,90 @@
+---
+title: "Nom du site test"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: lumen
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(leaflet)
+library(plotly)
+library(rjson)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R")
+m 
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+data <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/school_earnings.csv")
+
+fig <- plot_ly(data, x = ~Women, y = ~Men, text = ~School, type = 'scatter', mode = 'markers',
+        marker = list(size = ~Gap, opacity = 0.5, color = 'rgb(255, 65, 54)'))
+fig <- fig %>% layout(title = 'Gender Gap in Earnings per University',
+         xaxis = list(showgrid = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+fig
+```
+
+### Chart C
+
+```{r}
+x <- c('Product<br>Revenue', 'Services<br>Revenue', 'Total<br>Revenue', 'Fixed<br>Costs', 'Variable<br>Costs', 'Total<br>Costs', 'Total')
+y <- c(400, 660, 660, 590, 400, 400, 340)
+base <- c(0, 430, 0, 570, 370, 370, 0)
+revenue <- c(430, 260, 690, 0, 0, 0, 0)
+costs <- c(0, 0, 0, 120, 200, 320, 0)
+profit <- c(0, 0, 0, 0, 0, 0, 370)
+text <- c('$430K', '$260K', '$690K', '$-120K', '$-200K', '$-320K', '$370K')
+data <- data.frame(x, base, revenue, costs, profit, text)
+
+#The default order will be alphabetized unless specified as below:
+data$x <- factor(data$x, levels = data[["x"]])
+
+fig <- plot_ly(data, x = ~x, y = ~base, type = 'bar', marker = list(color = 'rgba(1,1,1, 0.0)'))
+fig <- fig %>% add_trace(y = ~revenue, marker = list(color = 'rgba(55, 128, 191, 0.7)',
+                                        line = list(color = 'rgba(55, 128, 191, 0.7)',
+                                                    width = 2)))
+fig <- fig %>% add_trace(y = ~costs, marker = list(color = 'rgba(219, 64, 82, 0.7)',
+                                      line = list(color = 'rgba(219, 64, 82, 1.0)',
+                                                  width = 2)))
+fig <- fig %>% add_trace(y = ~profit, marker = list(color = 'rgba(50, 171, 96, 0.7)',
+                                      line = list(color = 'rgba(50, 171, 96, 1.0)',
+                                                  width = 2)))
+fig <- fig %>% layout(title = 'Annual Profit - 2015',
+         xaxis = list(title = ""),
+         yaxis = list(title = ""),
+         barmode = 'stack',
+         paper_bgcolor = 'rgba(245, 246, 249, 1)',
+         plot_bgcolor = 'rgba(245, 246, 249, 1)',
+         showlegend = FALSE)
+fig <- fig %>% add_annotations(text = text,
+                  x = x,
+                  y = y,
+                  xref = "x",
+                  yref = "y",
+                  font = list(family = 'Arial',
+                              size = 14,
+                              color = 'rgba(245, 246, 249, 1)'),
+                  showarrow = FALSE)
+
+fig
+```
+
